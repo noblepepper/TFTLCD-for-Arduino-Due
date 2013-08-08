@@ -1,0 +1,236 @@
+diff -c TFTLCD-Library-master/Adafruit_TFTLCD.cpp ADATFTforDuePatched/Adafruit_TFTLCD.cpp
+*** TFTLCD/Adafruit_TFTLCD.cpp	2013-07-15 15:51:42.000000000 -0500
+--- ADATFTforDuePatched/Adafruit_TFTLCD.cpp	2013-08-06 05:59:17.291783000 -0500
+***************
+*** 6,11 ****
+--- 6,16 ----
+  
+  #ifdef __AVR__
+  #include <avr/pgmspace.h>
++ #else
++ #define PROGMEM /* empty */
++ #define pgm_read_byte(x) (*(x))
++ #define pgm_read_word(x) (*(x))
++ #define pgm_read_float(x) (*(x))
+  #endif
+  #include "pins_arduino.h"
+  #include "wiring_private.h"
+***************
+*** 84,92 ****
+--- 89,102 ----
+  
+  // Constructor for breakout board (configurable LCD control lines).
+  // Can still use this w/shield, but parameters are ignored.
++ #ifndef __SAM3X8E__
+  Adafruit_TFTLCD::Adafruit_TFTLCD(
+    uint8_t cs, uint8_t cd, uint8_t wr, uint8_t rd, uint8_t reset) :
+    Adafruit_GFX(TFTWIDTH, TFTHEIGHT) {
++ #else
++ Adafruit_TFTLCD::Adafruit_TFTLCD(
++   uint32_t cs, uint32_t cd, uint32_t wr, uint32_t rd, uint32_t reset) : Adafruit_GFX(TFTWIDTH, TFTHEIGHT) {
++ #endif
+  
+  #ifndef USE_ADAFRUIT_SHIELD_PINOUT
+    // Convert pin numbers to registers and bitmasks
+diff -c TFTLCD-Library-master/Adafruit_TFTLCD.h ADATFTforDuePatched/Adafruit_TFTLCD.h
+*** TFTLCD/Adafruit_TFTLCD.h	2013-07-15 15:51:42.000000000 -0500
+--- ADATFTforDuePatched/Adafruit_TFTLCD.h	2013-08-05 14:48:47.210863000 -0500
+***************
+*** 15,28 ****
+  
+  // **** IF USING THE LCD BREAKOUT BOARD, COMMENT OUT THIS NEXT LINE. ****
+  // **** IF USING THE LCD SHIELD, LEAVE THE LINE ENABLED:             ****
+! #define USE_ADAFRUIT_SHIELD_PINOUT
+  
+  class Adafruit_TFTLCD : public Adafruit_GFX {
+  
+   public:
+! 
+!   Adafruit_TFTLCD(uint8_t cs, uint8_t cd, uint8_t wr, uint8_t rd, uint8_t rst);
+!   Adafruit_TFTLCD(void);
+  
+    void     begin(uint16_t id = 0x9325),
+             drawPixel(int16_t x, int16_t y, uint16_t color),
+--- 15,31 ----
+  
+  // **** IF USING THE LCD BREAKOUT BOARD, COMMENT OUT THIS NEXT LINE. ****
+  // **** IF USING THE LCD SHIELD, LEAVE THE LINE ENABLED:             ****
+! //#define USE_ADAFRUIT_SHIELD_PINOUT
+  
+  class Adafruit_TFTLCD : public Adafruit_GFX {
+  
+   public:
+! #ifndef __SAM3X8E__
+! 	Adafruit_TFTLCD(uint8_t cs, uint8_t cd, uint8_t wr, uint8_t rd, uint8_t rst);
+! #else
+! 	Adafruit_TFTLCD(uint32_t cs, uint32_t cd, uint32_t wr, uint32_t rd, uint32_t reset);
+! #endif
+! 	Adafruit_TFTLCD(void);
+  
+    void     begin(uint16_t id = 0x9325),
+             drawPixel(int16_t x, int16_t y, uint16_t color),
+***************
+*** 73,82 ****
+    #define  read8isFunctionalized
+  #endif
+  #ifndef USE_ADAFRUIT_SHIELD_PINOUT
+!   volatile uint8_t *csPort    , *cdPort    , *wrPort    , *rdPort;
+!   uint8_t           csPinSet  ,  cdPinSet  ,  wrPinSet  ,  rdPinSet  ,
+!                     csPinUnset,  cdPinUnset,  wrPinUnset,  rdPinUnset,
+!                    _reset;
+  #endif
+  };
+  
+--- 76,92 ----
+    #define  read8isFunctionalized
+  #endif
+  #ifndef USE_ADAFRUIT_SHIELD_PINOUT
+! 	#if defined(__arm__) && defined(__SAM3X8E__)
+!   	  	  volatile uint32_t *csPort    , *cdPort    , *wrPort    , *rdPort;
+!     	    	  	uint32_t  csPinSet  ,  cdPinSet  ,  wrPinSet  ,  rdPinSet  ,
+!     	  	  	              csPinUnset,  cdPinUnset,  wrPinUnset,  rdPinUnset,
+!     	  	  	              _reset;
+!     #else
+!     	   volatile uint8_t *csPort    , *cdPort    , *wrPort    , *rdPort;
+!     	  	  	  	 uint8_t  csPinSet  ,  cdPinSet  ,  wrPinSet  ,  rdPinSet  ,
+!                               csPinUnset,  cdPinUnset,  wrPinUnset,  rdPinUnset,
+!                               _reset;
+! 	#endif
+  #endif
+  };
+  
+diff -c TFTLCD-Library-master/pin_magic.h ADATFTforDuePatched/pin_magic.h
+*** TFTLCD/pin_magic.h	2013-07-15 15:51:42.000000000 -0500
+--- ADATFTforDuePatched/pin_magic.h	2013-08-06 06:04:01.439788000 -0500
+***************
+*** 32,42 ****
+  // given for each supported board.
+  
+  // Shield pin usage:
+! // LCD Data Bit :   7   6   5   4   3   2   1   0
+! // Digital pin #:   7   6  13   4  11  10   9   8
+! // Uno port/pin : PD7 PD6 PB5 PD4 PB3 PB2 PB1 PB0
+! // Mega port/pin: PH4 PH3 PB7 PG5 PB5 PB4 PH6 PH5
+! // Leo port/pin : PE6 PD7 PC7 PD4 PB7 PB6 PB5 PB4
+  // Breakout pin usage:
+  // LCD Data Bit :   7   6   5   4   3   2   1   0
+  // Uno dig. pin :   7   6   5   4   3   2   9   8
+--- 32,45 ----
+  // given for each supported board.
+  
+  // Shield pin usage:
+! // LCD Data Bit :   7    6    5    4    3    2    1    0
+! // Digital pin #:   7    6   13    4   11   10    9    8
+! // Uno port/pin : PD7  PD6  PB5  PD4  PB3  PB2  PB1  PB0
+! // Mega port/pin: PH4  PH3  PB7  PG5  PB5  PB4  PH6  PH5
+! // Leo port/pin : PE6  PD7  PC7  PD4  PB7  PB6  PB5  PB4
+! // Due port/pin : PC23 PC24 PB27 PC26 PD07 PC29 PC21 PC22
+! 
+! 
+  // Breakout pin usage:
+  // LCD Data Bit :   7   6   5   4   3   2   1   0
+  // Uno dig. pin :   7   6   5   4   3   2   9   8
+***************
+*** 53,61 ****
+  // last line is a radioactive mutant emoticon.
+  #define DELAY7        \
+    asm volatile(       \
+!     "rjmp .+0" "\n\t" \
+!     "rjmp .+0" "\n\t" \
+!     "rjmp .+0" "\n\t" \
+      "nop"      "\n"   \
+      ::);
+  
+--- 56,67 ----
+  // last line is a radioactive mutant emoticon.
+  #define DELAY7        \
+    asm volatile(       \
+!     "nop" "\n\t" \
+!     "nop" "\n\t" \
+!     "nop" "\n\t" \
+!     "nop" "\n\t" \
+!     "nop" "\n\t" \
+!     "nop" "\n\t" \
+      "nop"      "\n"   \
+      ::);
+  
+***************
+*** 252,257 ****
+--- 258,334 ----
+    // program to compile.
+    #define write8 write8inline
+  
++ #elif defined(__SAM3X8E__)
++   #ifdef USE_ADAFRUIT_SHIELD_PINOUT
++   #define RD_PORT REG_PIOA_ODSR
++   #define WR_PORT REG_PIOA_ODSR
++   #define CD_PORT REG_PIOA_ODSR
++   #define CS_PORT REG_PIOA_ODSR
++ 
++ #define RD_MASK 0x00010000
++   #define WR_MASK 0x01000000
++   #define CD_MASK 0x00800000
++   #define CS_MASK 0x00400000
++ 
++ #define setWriteDirInline() REG_PIOC_OER = 0x25E00000;REG_PIOD_OER = 0x00000080;REG_PIOB_OER = 0x08000000;
++ #define setReadDirInline() { pmc_enable_periph_clk(g_APinDescription[7].ulPeripheralId);\
++ pmc_enable_periph_clk(g_APinDescription[13].ulPeripheralId);pmc_enable_periph_clk(g_APinDescription[11].ulPeripheralId);\
++ REG_PIOC_ODR = 0x25E00000;REG_PIOD_ODR = 0x00000080;REG_PIOB_ODR = 0x08000000;}
++ 
++ #define write8inline(d) {\
++ uint32_t portb = (  ((((d)>>5) & 0x00000001 )<<27 ));\
++ uint32_t portc = (	((((d)>>7) & 0x00000001 )<<23) | \
++ 					((((d)>>6) & 0x00000001 )<<24) | \
++ 					((((d)>>4) & 0x00000001 )<<26) | \
++ 					((((d)>>2) & 0x00000001 )<<29) | \
++ 					((((d)>>1) & 0x00000001 )<<21) | \
++ 					(( (d)     & 0x00000001 )<<22) );\
++ uint32_t portd = (  ((((d)>>3) & 0x00000001 )<<7 ) );\
++ 		  REG_PIOB_ODSR = (REG_PIOB_ODSR & 0xF7FFFFFF) | (portb & 0x08000000);\
++ 		  REG_PIOC_ODSR = (REG_PIOC_ODSR & 0xDA1FFFFF) | (portc & 0x25E00000);\
++ 		  REG_PIOD_ODSR = (REG_PIOD_ODSR & 0xFFFFFF7F) | (portd & 0x00000080);\
++ 		  WR_STROBE;\
++ }
++ 
++ #define read8inline(result) {											\
++ 	RD_ACTIVE;															\
++ 	DELAY7;	DELAY7;	DELAY7;	DELAY7;	DELAY7;								\
++ 	result = ((((REG_PIOC_PDSR)>>23) & 0x00000001 )<<7) |				\
++ 					       ((((REG_PIOC_PDSR)>>24) & 0x00000001 )<<6) | \
++ 					       ((((REG_PIOB_PDSR)>>27) & 0x00000001 )<<5) | \
++ 					       ((((REG_PIOC_PDSR)>>26) & 0x00000001 )<<4) | \
++ 					       ((((REG_PIOD_PDSR)>>7)  & 0x00000001 )<<3) | \
++ 					       ((((REG_PIOC_PDSR)>>29) & 0x00000001 )<<2) | \
++ 					       ((((REG_PIOC_PDSR)>>21) & 0x00000001 )<<1) | \
++ 					       (( (REG_PIOC_PDSR)>>22) & 0x00000001     );	\
++ 	RD_IDLE; }
++ 
++  #else
++ 
++ #define write8inline(d)	{   REG_PIOC_ODSR = (REG_PIOC_ODSR & 0xFFFFFE01) | ((d << 1) & 0x000001FE);\
++ 								WR_STROBE;\
++ 							}
++ 
++ #define read8inline(result) {							\
++ 		RD_ACTIVE;										\
++ 		DELAY7;	DELAY7;	DELAY7;	DELAY7;	DELAY7;			\
++ 		result = ((REG_PIOC_PDSR >> 1) & 0x000000FF);	\
++ 		RD_IDLE; }
++ 
++ #define setWriteDirInline() REG_PIOC_OER = 0x000001FE;
++   #define setReadDirInline(){ pmc_enable_periph_clk(g_APinDescription[33].ulPeripheralId);\
++   REG_PIOC_ODR = 0x000001FE; }
++ 
++  #endif
++ 
++   #define write8            write8inline
++   #define read8             read8inline
++   #define setWriteDir       setWriteDirInline
++   #define setReadDir 		 setReadDirInline
++   #define writeRegister8    writeRegister8inline
++   #define writeRegister16   writeRegister16inline
++   #define writeRegisterPair writeRegisterPairInline
++ 
+  #else
+  
+   #error "Board type unsupported / not recognized"
