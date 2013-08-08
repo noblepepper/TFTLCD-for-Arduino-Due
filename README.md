@@ -11,12 +11,12 @@ To use this patch put the file TFTpatch in your libraries directory which should
 
 arduino-1.5.2/libraries$ ls
 
-Adafruit_GFX  LiquidCrystal  SD  TFTLCD  TFTpatch
+Adafruit_GFX  LiquidCrystal  SD  Adafruit_TFTLCD  TFTpatch
 
 arduino-1.5.2/libraries$ patch -p0 -i  TFTpatch
 
 The patched library will expect the TFT Data Pins #0-7 connected to 
-Due pins #33-40.
+Due pins #33-40 if using the breakout board.
 
 The example sketches also will not run on the Due but for me adding this just below the #include statements solved the problem:
 `#ifdef __arm__`
