@@ -1,5 +1,5 @@
 diff -c TFTLCD-Library-master/Adafruit_TFTLCD.cpp ADATFTforDuePatched/Adafruit_TFTLCD.cpp
-*** TFTLCD/Adafruit_TFTLCD.cpp	2013-07-15 15:51:42.000000000 -0500
+*** Adafruit_TFTLCD/Adafruit_TFTLCD.cpp	2013-07-15 15:51:42.000000000 -0500
 --- ADATFTforDuePatched/Adafruit_TFTLCD.cpp	2013-08-06 05:59:17.291783000 -0500
 ***************
 *** 6,11 ****
@@ -33,7 +33,7 @@ diff -c TFTLCD-Library-master/Adafruit_TFTLCD.cpp ADATFTforDuePatched/Adafruit_T
   #ifndef USE_ADAFRUIT_SHIELD_PINOUT
     // Convert pin numbers to registers and bitmasks
 diff -c TFTLCD-Library-master/Adafruit_TFTLCD.h ADATFTforDuePatched/Adafruit_TFTLCD.h
-*** TFTLCD/Adafruit_TFTLCD.h	2013-07-15 15:51:42.000000000 -0500
+*** Adafruit_TFTLCD/Adafruit_TFTLCD.h	2013-07-15 15:51:42.000000000 -0500
 --- ADATFTforDuePatched/Adafruit_TFTLCD.h	2013-08-05 14:48:47.210863000 -0500
 ***************
 *** 15,28 ****
@@ -100,7 +100,7 @@ diff -c TFTLCD-Library-master/Adafruit_TFTLCD.h ADATFTforDuePatched/Adafruit_TFT
   };
   
 diff -c TFTLCD-Library-master/pin_magic.h ADATFTforDuePatched/pin_magic.h
-*** TFTLCD/pin_magic.h	2013-07-15 15:51:42.000000000 -0500
+*** Adafruit_TFTLCD/pin_magic.h	2013-07-15 15:51:42.000000000 -0500
 --- ADATFTforDuePatched/pin_magic.h	2013-08-06 06:04:01.439788000 -0500
 ***************
 *** 32,42 ****
