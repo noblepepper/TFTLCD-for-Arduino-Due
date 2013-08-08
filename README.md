@@ -19,6 +19,7 @@ The patched library will expect the TFT Data Pins #0-7 connected to
 Due pins #33-40 if using the breakout board.
 
 The example sketches also will not run on the Due but for me adding this just below the #include statements solved the problem:
+
 `#ifdef __arm__`
 
 `#define PROGMEM /* empty */`
